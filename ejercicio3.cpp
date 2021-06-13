@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>       /* time */
 using namespace std;
-#define N 10
+#define N 120
 
 
 int main(int argc, char *argv[]) {
@@ -18,7 +18,8 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     int rows_per_process = N/(numprocs-1);
     int v[N], x[N]={0};
-
+    double initial_time,ending_time,ending_time2;
+    
     if (me ==0){
         for (int i=0;i<N;i++){
             v[i]=rand()%10;
@@ -34,6 +35,8 @@ int main(int argc, char *argv[]) {
                 A[i][j]=rand()%10;
             }
         }
+
+        initial_time=MPI_Wtime();
         for(int i = 0; i < N; i++){
             MPI_Send(&A[i][0],N,MPI_INT,i/rows_per_process+1,i,MPI_COMM_WORLD);                    
             //MPI_Ssend(&A[i],N,MPI_INT,(i+1),0,MPI_COMM_WORLD); 
@@ -42,10 +45,20 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < N; i++){
             MPI_Recv(&x[i],1,MPI_INT,i/rows_per_process+1,i,MPI_COMM_WORLD,MPI_STATUS_IGNORE);        
         }
-        for(int i = 0; i < N; i++){
+        ending_time=MPI_Wtime();
+        cout<<"el proceso paralelo con Num_Procesos = "<<numprocs<<" demoro: "<<ending_time-initial_time<<endl;
+        /*for(int i = 0; i < N; i++){
             cout<<x[i]<<" ";
-        }cout<<endl; 
-
+        }cout<<endl;*/ 
+        int x2[N]={0};
+        for (int i=0;i<N;i++){
+            int suma = 0;
+            for (int j =0;j<N;j++){
+                x2[i]+=A[i][j]*v[j];
+            }   
+        }    
+        ending_time2=MPI_Wtime();
+        cout<<"el proceso secuencial con Num_Procesos = "<<numprocs<<"demoro: "<<ending_time2-ending_time<<endl;
 
     } 	
 	else {
