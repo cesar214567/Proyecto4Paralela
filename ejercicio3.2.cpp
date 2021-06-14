@@ -10,7 +10,6 @@ using namespace std;
 int main(int argc, char *argv[]) {
     int me, numprocs;
 	int data, res;
-    srand(time(NULL));
 
     MPI_Init(&argc,&argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
@@ -22,6 +21,7 @@ int main(int argc, char *argv[]) {
     int lA[rows_per_process][N];
 
     if(me==0){
+        srand(time(NULL));
         int A[N][N];
         for (int i=0;i<N;i++){
             for(int j =0;j<N;j++){
@@ -32,30 +32,39 @@ int main(int argc, char *argv[]) {
     }
 
     initial_time=MPI_Wtime();
-    MPI_Bcast(&v,N,MPI_INT,0,MPI_COMM_WORLD);
-    MPI_Barrier( MPI_COMM_WORLD);
-    MPI_Scatter( &A[0][0] , N*rows_per_process , MPI_INT , &lA[0][0] , N*rows_per_process , MPI_INT ,  0 , MPI_COMM_WORLD);
-    MPI_Barrier( MPI_COMM_WORLD);
+    //MPI_Barrier( MPI_COMM_WORLD);    
+    
+    MPI_Scatter( (int**)A , N*rows_per_process , MPI_INT , (int**)lA , N*rows_per_process , MPI_INT ,0 , MPI_COMM_WORLD);
+    MPI_Bcast((int*)v,N,MPI_INT,0,MPI_COMM_WORLD);
+
+
+    cout<<"proceso "<<me<<"  of " <<numprocs<<endl;
+
 
     for (int i = 0;i<rows_per_process;i++){
         for (int j = 0;j<N;j++){
             lx[i]+=lA[i][j]*v[j];
         }
     }
-    MPI_Gather( &lx[0], rows_per_process , MPI_INT , &x[0] , rows_per_process , MPI_INT , 0 , MPI_COMM_WORLD);
-    MPI_Barrier( MPI_COMM_WORLD);
-    
 
+    MPI_Gather( (int*)lx, rows_per_process , MPI_INT , (int*)x , rows_per_process , MPI_INT , 0 , MPI_COMM_WORLD);
+    //MPI_Barrier( MPI_COMM_WORLD);    
+
+    
     if (me==0){
         ending_time=MPI_Wtime();
         int sx[N]={0};
 
+        for(int i=0;i<N;i++){
+            cout<<x[i]<<" ";
+        }cout<<endl;
+        cout<<endl;
         for (int i=0;i<N;i++){
-            int suma =0;
             for(int j =0;j<N;j++){
-                sx[0]+=A[i][j]*v[j];
+                sx[i]+=A[i][j]*v[j];
             }
-        }
+            cout<<sx[i]<<" ";
+        }cout<<endl;
         ending_time2=MPI_Wtime();
         cout<<"el proceso paralelo con Num_Procesos = "<<numprocs<<" demoro: "<<ending_time-initial_time<<endl;
         cout<<"el proceso secuencial con Num_Procesos = "<<numprocs<<"demoro: "<<ending_time2-ending_time<<endl;
@@ -63,8 +72,8 @@ int main(int argc, char *argv[]) {
     
     }
     
-
     MPI_Finalize();
+    return 0;
 }
     
     
