@@ -27,18 +27,3 @@ int main(int argc, char *argv[]) {
     }    
     MPI_Finalize();
 }
-    
-	/*cout<<"1.Proceso "<<me<<", data: "<<data<<", res: "<<res<<endl;
-
-        MPI_Bcast(&data,1,MPI_INT,0,MPI_COMM_WORLD);
-
-	MPI_Barrier(MPI_COMM_WORLD);
-        
-	cout<<"2.Proceso "<<me<<", data: "<<data<<", res: "<<res<<endl;
-	MPI_Reduce(&data, &res, 1, MPI_INT, MPI_PROD,
-	                   0, MPI_COMM_WORLD);
-
-	if (me==0) {
-	cout<<"3.Proceso "<<me<<", data: "<<data<<", res: "<<res<<endl;
-        } */
-    
