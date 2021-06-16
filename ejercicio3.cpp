@@ -39,7 +39,6 @@ int main(int argc, char *argv[]) {
         initial_time=MPI_Wtime();
         for(int i = 0; i < N; i++){
             MPI_Send(&A[i][0],N,MPI_INT,i/rows_per_process+1,i,MPI_COMM_WORLD);                    
-            //MPI_Ssend(&A[i],N,MPI_INT,(i+1),0,MPI_COMM_WORLD); 
         }
         //receive
         for(int i = 0; i < N; i++){
